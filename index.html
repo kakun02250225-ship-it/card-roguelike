@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>深淵の塔 - Abyss Deck -</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== タイトル画面 ===== -->
+  <div id="title-screen" class="overlay">
+    <div class="overlay-box title-box">
+      <h1 class="game-title">深淵の塔</h1>
+      <p class="game-subtitle">- Abyss Deck -</p>
+      <p class="title-text">
+        カードを集め、デッキを鍛え、<br />
+        塔に巣食う4体の魔物を打ち倒せ。
+      </p>
+      <button id="start-button" class="big-button">⚔️ 冒険を始める</button>
+      <div class="title-howto">
+        <p>🃏 カードをクリックして使用（エナジーを消費）</p>
+        <p>🔮 毎ターン、エナジー3で5枚ドロー</p>
+        <p>👁 敵の頭上に「次の行動」が予告される</p>
+        <p>🗼 敵を倒したら進む道を選ぶ（戦闘・強敵・休憩所・イベント）</p>
+        <p>⌨️ ESCキーでメニュー（やり直し）</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 戦闘画面 ===== -->
+  <div id="game-screen" class="hidden">
+
+    <!-- 上部バー：進行状況 -->
+    <header id="top-bar">
+      <span id="floor-info">🗼 第 1 層 / 8</span>
+      <span class="top-title">深淵の塔</span>
+      <span class="top-right">
+        <span id="coin-info" title="ガチャコイン">🪙 0</span>
+        <span id="pile-info">山札 0 ｜ 捨て札 0</span>
+      </span>
+    </header>
+
+    <!-- 戦場：プレイヤーと敵 -->
+    <main id="battlefield">
+
+      <!-- プレイヤー側 -->
+      <section id="player-area" class="fighter">
+        <div class="intent-space"></div>
+        <div id="player-figure" class="figure"></div>
+        <div class="fighter-name">放浪の騎士</div>
+        <div class="hp-bar">
+          <div id="player-hp-fill" class="hp-fill"></div>
+          <span id="player-hp-text" class="hp-text">75 / 75</span>
+        </div>
+        <div class="status-row">
+          <span id="player-block" class="badge block-badge hidden">🛡️ 0</span>
+          <span id="player-strength" class="badge strength-badge hidden">💪 0</span>
+        </div>
+      </section>
+
+      <!-- 中央：バトルログ -->
+      <section id="log-area">
+        <div id="log"></div>
+      </section>
+
+      <!-- 敵側 -->
+      <section id="enemy-area" class="fighter">
+        <div id="enemy-intent" class="intent">⚔️ 8</div>
+        <div id="enemy-figure" class="figure"></div>
+        <div id="enemy-name" class="fighter-name">朽ちた骸骨</div>
+        <div class="hp-bar">
+          <div id="enemy-hp-fill" class="hp-fill enemy-hp"></div>
+          <span id="enemy-hp-text" class="hp-text">42 / 42</span>
+        </div>
+        <div class="status-row">
+          <span id="enemy-block" class="badge block-badge hidden">🛡️ 0</span>
+          <span id="enemy-strength" class="badge strength-badge hidden">💪 0</span>
+        </div>
+      </section>
+    </main>
+
+    <!-- 下部：エナジー・手札・ターン終了 -->
+    <footer id="bottom-bar">
+      <div id="energy-orb">
+        <span id="energy-text">3/3</span>
+        <span class="energy-label">エナジー</span>
+      </div>
+      <div id="hand"></div>
+      <button id="end-turn-button" class="big-button">ターン終了 ▶</button>
+    </footer>
+  </div>
+
+  <!-- ===== マップ選択画面 ===== -->
+  <div id="map-screen" class="overlay hidden">
+    <div class="overlay-box">
+      <h2>🗼 進む道を選べ</h2>
+      <p id="map-floor-text">第 2 層 / 8 へ進む</p>
+      <div id="map-nodes" class="map-row"></div>
+    </div>
+  </div>
+
+  <!-- ===== 休憩所・イベント画面（共用） ===== -->
+  <div id="node-screen" class="overlay hidden">
+    <div class="overlay-box">
+      <h2 id="node-title">🔥 休憩所</h2>
+      <p id="node-desc"></p>
+      <div id="node-choices" class="node-choice-row"></div>
+      <p id="node-result" class="node-result hidden"></p>
+      <button id="node-continue-button" class="big-button hidden">進む ▶</button>
+    </div>
+  </div>
+
+  <!-- ===== カード報酬画面 ===== -->
+  <div id="reward-screen" class="overlay hidden">
+    <div class="overlay-box">
+      <h2>🏆 勝利！</h2>
+      <p>戦利品として、カードを1枚デッキに加えられる。</p>
+      <div id="reward-cards" class="card-row"></div>
+
+      <!-- ガチャコーナー（カード報酬とは別枠） -->
+      <div id="reward-gacha-box">
+        <span id="reward-coin-text">🪙 所持コイン：0</span>
+        <button id="gacha-button" class="gacha-button">🎰 ガチャを引く（🪙10）</button>
+      </div>
+
+      <button id="skip-reward-button" class="small-button">カードを受け取らずに進む ▶</button>
+    </div>
+  </div>
+
+  <!-- ===== ガチャ結果画面 ===== -->
+  <div id="gacha-screen" class="overlay hidden">
+    <div class="overlay-box">
+      <h2 id="gacha-rarity-label">✦ RARE ✦</h2>
+      <p>新たなカードを手に入れた！（デッキに追加された）</p>
+      <div id="gacha-card" class="card-row"></div>
+      <p id="gacha-coin-text">🪙 残りコイン：0</p>
+      <button id="gacha-again-button" class="gacha-button">🎰 もう一回引く（🪙10）</button>
+      <button id="gacha-close-button" class="small-button">戻る ▶</button>
+    </div>
+  </div>
+
+  <!-- ===== 結果画面（クリア / ゲームオーバー） ===== -->
+  <div id="result-screen" class="overlay hidden">
+    <div class="overlay-box">
+      <h2 id="result-title">GAME OVER</h2>
+      <p id="result-text">騎士は深淵に呑まれた……</p>
+      <p id="result-stats"></p>
+      <button id="restart-button" class="big-button">🔁 もう一度挑戦する</button>
+    </div>
+  </div>
+
+  <!-- ===== ポーズメニュー（ESCキー） ===== -->
+  <div id="pause-screen" class="overlay overlay-top hidden">
+    <div class="overlay-box">
+      <h2>⏸ メニュー</h2>
+      <div class="menu-buttons">
+        <button id="resume-button" class="big-button">▶ 続ける</button>
+        <button id="retry-button" class="small-button">🔁 最初からやり直す</button>
+        <button id="to-title-button" class="small-button">🏰 タイトルへ戻る</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
