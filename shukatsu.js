@@ -464,6 +464,15 @@ function companyCard(c) {
       <span class="${uc}" style="margin-left:auto">${days===0?'今日':days===1?'明日':days+'日後'}</span>
     </div>`;
   }
+  const nextStatuses = getNextStatuses(c.status);
+  const quickBtns = nextStatuses.length > 0 ? `
+  <div class="cc-quick-status">
+    ${nextStatuses.map(s => {
+      const si = getStatusInfo(s);
+      return `<button class="quick-status-btn" style="color:${si.color};border-color:${si.color}"
+        onclick="quickStatusUpdate('${c.id}','${s}',event)">${si.label}</button>`;
+    }).join('')}
+  </div>` : '';
   return `
     <div class="company-card" onclick="openModal('${c.id}')">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${color};border-radius:14px 14px 0 0"></div>
@@ -486,6 +495,7 @@ function companyCard(c) {
         <a href="https://www.google.com/search?q=${encodeURIComponent(c.name)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="search-link">🔍 検索</a>
       </div>
       ${nextHtml}
+      ${quickBtns}
     </div>`;
 }
 
@@ -889,6 +899,39 @@ function togglePass() {
   else { inp.type='password'; btn.textContent='👁'; }
 }
 
+// ===== QUICK STATUS =====
+function getNextStatuses(status) {
+  const map = {
+    'interested':      ['es_preparing', 'info_done'],
+    'info_done':       ['es_preparing', 'interested'],
+    'es_preparing':    ['es_submitted'],
+    'es_submitted':    ['screening', 'rejected'],
+    'screening':       ['aptitude', 'interview_1', 'rejected'],
+    'aptitude':        ['gd', 'interview_1', 'rejected'],
+    'gd':              ['interview_1', 'rejected'],
+    'interview_1':     ['interview_2', 'interview_final', 'rejected'],
+    'interview_2':     ['interview_final', 'rejected'],
+    'interview_final': ['offer', 'rejected'],
+    'offer':           ['offer_accepted', 'declined'],
+    'offer_accepted':  [],
+    'rejected':        [],
+    'declined':        [],
+  };
+  return (map[status] || []).slice(0, 2);
+}
+
+function quickStatusUpdate(companyId, newStatus, event) {
+  event.stopPropagation();
+  const idx = companies.findIndex(c => c.id === companyId);
+  if (idx === -1) return;
+  companies[idx].status = newStatus;
+  save();
+  if (currentPage === 'dashboard') renderDashboard();
+  else renderCompanies();
+  const si = getStatusInfo(newStatus);
+  showToast(`✅ ${si.label} に更新`);
+}
+
 // ===== INIT =====
 function initListeners() {
   document.querySelectorAll('.nav-item,.bn-item').forEach(el => {
@@ -956,6 +999,19 @@ function initListeners() {
     if (!confirm('全データを削除します。元に戻せません。')) return;
     companies=[]; save(); navigate('dashboard'); showToast('🗑️ 全データを削除しました');
   });
+  document.getElementById('f-mypage-url').addEventListener('blur', () => {
+    const url = document.getElementById('f-mypage-url').value.trim();
+    const nameField = document.getElementById('f-name');
+    if (!url || nameField.value.trim()) return; // don't overwrite existing name
+    try {
+      const hostname = new URL(url).hostname.replace(/^www\./, '');
+      const parts = hostname.split('.');
+      const domain = parts[0]; // e.g. "mynavi" from "mynavi.jp"
+      nameField.value = domain;
+      nameField.focus();
+      showToast('💡 URLからドメイン名を入力しました。企業名に書き換えてください');
+    } catch(e) {}
+  });
   document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
   const mt = document.getElementById('menu-toggle');
   if (mt) mt.addEventListener('click', () => navigate(currentPage));
@@ -986,6 +1042,10 @@ function init() {
         const savedTheme = localStorage.getItem('shukatsu_theme');
         if (savedTheme === 'dark') setTheme(true);
         navigate('dashboard');
+        if (window.location.hash === '#add') {
+          setTimeout(() => openModal(null), 300);
+          history.replaceState(null, '', window.location.pathname);
+        }
       } else {
         showLoginOverlay();
         document.getElementById('app').style.display = 'none';
@@ -998,6 +1058,10 @@ function init() {
     const savedTheme = localStorage.getItem('shukatsu_theme');
     if (savedTheme === 'dark') setTheme(true);
     navigate('dashboard');
+    if (window.location.hash === '#add') {
+      setTimeout(() => openModal(null), 300);
+      history.replaceState(null, '', window.location.pathname);
+    }
   }
 }
 
