@@ -465,12 +465,16 @@ function companyCard(c) {
     </div>`;
   }
   const nextStatuses = getNextStatuses(c.status);
-  const quickBtns = nextStatuses.length > 0 ? `
+  const curIdx = STATUS_OPTIONS.findIndex(s => s.value === c.status);
+  const prevStatus = curIdx > 0 ? STATUS_OPTIONS[curIdx - 1] : null;
+  const quickBtns = (nextStatuses.length > 0 || prevStatus) ? `
   <div class="cc-quick-status">
+    ${prevStatus ? `<button class="quick-status-btn back-btn" style="color:#9CA3AF;border-color:#D1D5DB"
+      onclick="quickStatusUpdate('${c.id}','${prevStatus.value}',event)">← ${prevStatus.label}</button>` : ''}
     ${nextStatuses.map(s => {
       const si = getStatusInfo(s);
       return `<button class="quick-status-btn" style="color:${si.color};border-color:${si.color}"
-        onclick="quickStatusUpdate('${c.id}','${s}',event)">${si.label}</button>`;
+        onclick="quickStatusUpdate('${c.id}','${s}',event)">${si.label} →</button>`;
     }).join('')}
   </div>` : '';
   return `
