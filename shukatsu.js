@@ -605,11 +605,13 @@ function openModal(companyId) {
   document.getElementById('tab-basic').classList.add('active');
 
   document.getElementById('modal-overlay').classList.remove('hidden');
+  document.body.classList.add('modal-open');
   document.getElementById('f-name').focus();
 }
 
 function closeModal() {
   document.getElementById('modal-overlay').classList.add('hidden');
+  document.body.classList.remove('modal-open');
   editingId = null;
 }
 
@@ -789,50 +791,10 @@ function initListeners() {
   if (mt) mt.addEventListener('click', () => navigate(currentPage));
 }
 
-function addSampleData() {
-  if (companies.length) return;
-  const today = new Date();
-  function addDays(n) { const r=new Date(today); r.setDate(r.getDate()+n); return toDateStr(r); }
-  companies = [
-    {
-      id:uuid(), createdAt:Date.now()-3000,
-      name:'株式会社テックスタート', industry:'IT・通信', jobType:'エンジニア',
-      internType:'summer', status:'interview_1', priority:3, location:'オンライン',
-      motivation:'最先端のAI技術に携わりたい', notes:'一次面接：技術質問中心', esNotes:'400字×2問',
-      mypageUrl:'https://example.com/mypage', mypageId:'', mypagePass:'', portalId:'',
-      events:[
-        {id:uuid(),type:'es_deadline',date:addDays(3),startTime:'',endTime:'',location:'',notes:''},
-        {id:uuid(),type:'interview_1',date:addDays(7),startTime:'14:00',endTime:'15:00',location:'Zoom',notes:'スーツ不要'},
-      ]
-    },
-    {
-      id:uuid(), createdAt:Date.now()-2000,
-      name:'グローバル商事', industry:'商社', jobType:'総合職',
-      internType:'winter', status:'es_submitted', priority:2, location:'東京',
-      motivation:'', notes:'', esNotes:'400字×3問',
-      mypageUrl:'', mypageId:'', mypagePass:'', portalId:'',
-      events:[
-        {id:uuid(),type:'es_deadline',date:addDays(1),startTime:'',endTime:'',location:'',notes:''},
-        {id:uuid(),type:'info_session',date:addDays(10),startTime:'10:00',endTime:'12:00',location:'オンライン',notes:''},
-      ]
-    },
-    {
-      id:uuid(), createdAt:Date.now()-1000,
-      name:'未来銀行', industry:'金融・保険', jobType:'総合職',
-      internType:'main', status:'gd', priority:2, location:'大阪',
-      motivation:'', notes:'', esNotes:'',
-      mypageUrl:'', mypageId:'', mypagePass:'', portalId:'',
-      events:[
-        {id:uuid(),type:'gd',date:addDays(14),startTime:'13:00',endTime:'15:00',location:'梅田本社',notes:''},
-      ]
-    },
-  ];
-  save();
-}
+// No sample data — start clean for new users
 
 function init() {
   load();
-  addSampleData();
   initListeners();
   navigate('dashboard');
 }
