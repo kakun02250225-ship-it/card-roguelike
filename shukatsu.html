@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>就活カレンダー</title>
+  <link rel="stylesheet" href="shukatsu.css">
+</head>
+<body>
+<div id="app">
+  <!-- Sidebar -->
+  <aside id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">📋</span>
+      <span class="logo-text">就活管理</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" data-page="dashboard">
+        <span class="nav-icon">📊</span><span class="nav-label">ダッシュボード</span>
+      </a>
+      <a class="nav-item" data-page="companies">
+        <span class="nav-icon">🏢</span><span class="nav-label">企業一覧</span>
+      </a>
+      <a class="nav-item" data-page="calendar">
+        <span class="nav-icon">📅</span><span class="nav-label">カレンダー</span>
+      </a>
+      <a class="nav-item" data-page="export">
+        <span class="nav-icon">📤</span><span class="nav-label">エクスポート</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <span id="sidebar-count">0 社登録中</span>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div id="content">
+    <header id="top-header">
+      <div class="header-left">
+        <button id="menu-toggle" class="menu-btn">☰</button>
+        <h1 class="page-title" id="page-title">ダッシュボード</h1>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-primary" id="btn-add-company">＋ 企業を追加</button>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <!-- Dashboard -->
+      <section class="page active" id="page-dashboard">
+        <div class="stats-row" id="stats-row"></div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <h2>直近の予定</h2>
+              <span class="badge badge-blue" id="upcoming-badge">0</span>
+            </div>
+            <div id="upcoming-list" class="event-list"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h2>⚠️ 締切・注意</h2>
+            </div>
+            <div id="deadline-list" class="event-list"></div>
+          </div>
+        </div>
+        <div class="card mt-16">
+          <div class="card-header"><h2>選考ステータス一覧</h2></div>
+          <div id="status-overview" class="status-grid"></div>
+        </div>
+      </section>
+
+      <!-- Companies -->
+      <section class="page" id="page-companies">
+        <div class="toolbar">
+          <input type="text" id="search-input" class="search-box" placeholder="🔍 企業名・業種で検索...">
+          <select id="filter-status" class="filter-select">
+            <option value="">全ステータス</option>
+          </select>
+          <select id="filter-industry" class="filter-select">
+            <option value="">全業種</option>
+          </select>
+          <select id="sort-select" class="filter-select">
+            <option value="createdAt">登録順</option>
+            <option value="name">企業名順</option>
+            <option value="priority">優先度順</option>
+            <option value="nextEvent">直近予定順</option>
+          </select>
+          <div class="view-toggle">
+            <button class="toggle-btn active" id="view-card" title="カード">⊞</button>
+            <button class="toggle-btn" id="view-list" title="リスト">☰</button>
+          </div>
+        </div>
+        <div id="companies-count" class="result-count"></div>
+        <div id="companies-container"></div>
+      </section>
+
+      <!-- Calendar -->
+      <section class="page" id="page-calendar">
+        <div class="calendar-controls">
+          <button class="btn btn-sm" id="cal-prev">◀ 前月</button>
+          <h2 id="cal-month-title"></h2>
+          <button class="btn btn-sm" id="cal-next">翌月 ▶</button>
+          <button class="btn btn-sm btn-outline" id="cal-today">今月</button>
+        </div>
+        <div class="calendar-legend" id="calendar-legend"></div>
+        <div class="calendar-wrap">
+          <div class="cal-weekdays">
+            <div class="sun">日</div><div>月</div><div>火</div>
+            <div>水</div><div>木</div><div>金</div><div class="sat">土</div>
+          </div>
+          <div id="cal-grid" class="cal-grid"></div>
+        </div>
+        <div id="cal-event-detail" class="cal-event-detail hidden"></div>
+      </section>
+
+      <!-- Export -->
+      <section class="page" id="page-export">
+        <div class="export-grid">
+          <div class="card export-card">
+            <div class="card-header"><h2>📅 カレンダーエクスポート</h2></div>
+            <p class="text-muted">ICS形式でエクスポートすることで、TimeTree・Googleカレンダー・Appleカレンダーなどへ取り込めます。</p>
+            <div class="form-group">
+              <label>対象企業</label>
+              <select id="export-company-filter" class="form-control">
+                <option value="all">全企業</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>期間（任意）</label>
+              <div class="date-range">
+                <input type="date" id="export-from" class="form-control">
+                <span>〜</span>
+                <input type="date" id="export-to" class="form-control">
+              </div>
+            </div>
+            <button class="btn btn-primary btn-block" id="btn-export-ics">📅 ICSファイルをダウンロード</button>
+            <div class="help-box mt-12">
+              <strong>TimeTreeへの取り込み方法</strong><br>
+              TimeTreeウェブ版 → 設定 → カレンダー追加 → ICSファイルからインポート<br>
+              <br>
+              <strong>Googleカレンダーへの取り込み方法</strong><br>
+              Googleカレンダー → 設定 → インポート/エクスポート → ファイルをインポート
+            </div>
+          </div>
+          <div class="card export-card">
+            <div class="card-header"><h2>📊 CSVエクスポート</h2></div>
+            <p class="text-muted">企業情報をExcel・スプレッドシートで管理できます。</p>
+            <button class="btn btn-secondary btn-block" id="btn-export-csv">📊 CSVをダウンロード</button>
+            <div class="card-header mt-20"><h2>💾 データバックアップ</h2></div>
+            <p class="text-muted">データをJSONで保存・復元できます。</p>
+            <button class="btn btn-secondary btn-block" id="btn-export-json">💾 JSONバックアップ</button>
+            <label class="btn btn-secondary btn-block mt-8" style="cursor:pointer;">
+              📂 JSONから復元
+              <input type="file" id="import-json" accept=".json" style="display:none">
+            </label>
+            <div class="danger-zone mt-20">
+              <p class="text-muted text-sm">全データを削除する場合（元に戻せません）</p>
+              <button class="btn btn-danger btn-block" id="btn-clear-data">🗑️ 全データを削除</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">企業を追加</h2>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="tab-btn active" data-tab="basic">基本情報</button>
+      <button class="tab-btn" data-tab="events">選考スケジュール</button>
+      <button class="tab-btn" data-tab="notes">メモ</button>
+    </div>
+    <div class="modal-body">
+      <!-- Basic Tab -->
+      <div class="tab-pane active" id="tab-basic">
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label class="required">企業名</label>
+            <input type="text" id="f-name" class="form-control" placeholder="株式会社〇〇">
+          </div>
+          <div class="form-group">
+            <label>優先度</label>
+            <div class="priority-btns" id="priority-btns">
+              <button class="pri-btn" data-v="1">低</button>
+              <button class="pri-btn active" data-v="2">中</button>
+              <button class="pri-btn" data-v="3">高</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>業種</label>
+            <select id="f-industry" class="form-control">
+              <option value="">選択</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>職種</label>
+            <input type="text" id="f-job-type" class="form-control" placeholder="エンジニア、営業 など">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>種別</label>
+            <select id="f-intern-type" class="form-control">
+              <option value="">選択</option>
+              <option value="summer">サマーインターン</option>
+              <option value="winter">冬インターン</option>
+              <option value="spring">春インターン</option>
+              <option value="year_round">通年インターン</option>
+              <option value="open">オープンカンパニー</option>
+              <option value="main">本選考</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>ステータス</label>
+            <select id="f-status" class="form-control"></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>開催場所</label>
+            <input type="text" id="f-location" class="form-control" placeholder="東京 / オンライン / ハイブリッド">
+          </div>
+          <div class="form-group">
+            <label>企業URL</label>
+            <input type="url" id="f-url" class="form-control" placeholder="https://...">
+          </div>
+        </div>
+      </div>
+
+      <!-- Events Tab -->
+      <div class="tab-pane" id="tab-events">
+        <div id="events-container"></div>
+        <button class="btn btn-outline btn-sm mt-8" id="btn-add-event">＋ 予定を追加</button>
+      </div>
+
+      <!-- Notes Tab -->
+      <div class="tab-pane" id="tab-notes">
+        <div class="form-group">
+          <label>志望動機・企業メモ</label>
+          <textarea id="f-motivation" class="form-control" rows="4" placeholder="志望動機、企業の特徴、気になった点など..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>選考対策・面接メモ</label>
+          <textarea id="f-notes" class="form-control" rows="4" placeholder="面接で聞かれた質問、対策、所感など..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>ES・提出書類メモ</label>
+          <textarea id="f-es-notes" class="form-control" rows="3" placeholder="ES設問、字数制限、提出状況など..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="btn-delete-company" style="display:none">削除</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-secondary" id="btn-cancel">キャンセル</button>
+      <button class="btn btn-primary" id="btn-save">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden"></div>
+
+<script src="shukatsu.js"></script>
+</body>
+</html>
