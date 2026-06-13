@@ -1,7 +1,8 @@
 # ポートフォリオ
 
 ## 📋 就活管理カレンダー
-[🌐 Web アプリで開く](https://kakun02250225-ship-it.github.io/card-roguelike/shukatsu.html)
+
+# 👉 [アプリを開く](https://kakun02250225-ship-it.github.io/card-roguelike/shukatsu.html)
 
 インターンシップ・本選考の予定を一元管理！カレンダー自動配置、TimeTree/Googleカレンダーへのエクスポート対応。
 
