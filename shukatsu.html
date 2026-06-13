@@ -119,6 +119,13 @@
 
       <!-- Export/Settings -->
       <section class="page" id="page-export">
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header"><h2>🌙 テーマ</h2></div>
+          <div class="theme-toggle-row">
+            <button class="theme-btn active" data-theme="light">☀️ ライト</button>
+            <button class="theme-btn" data-theme="dark">🌙 ダーク</button>
+          </div>
+        </div>
         <div class="export-grid">
           <div class="card export-card">
             <div class="card-header"><h2>📅 カレンダー連携</h2></div>
@@ -175,10 +182,11 @@
   <div class="modal" id="modal">
     <div class="modal-header">
       <div class="modal-avatar" id="modal-avatar"></div>
-      <div>
+      <div style="flex:1;min-width:0">
         <h2 id="modal-title">企業を追加</h2>
         <p id="modal-subtitle" class="modal-subtitle"></p>
       </div>
+      <a id="modal-search-btn" href="#" target="_blank" rel="noopener" class="modal-search-btn" style="display:none">🔍 検索</a>
       <button class="modal-close" id="modal-close">✕</button>
     </div>
     <div class="modal-tabs">

@@ -69,6 +69,7 @@ let viewMode = 'card';
 let editingId = null;
 let editPriority = 2;
 let modalEvents = [];
+let lastDeleted = null;
 
 // ===== STORAGE =====
 function save() {
@@ -140,6 +141,33 @@ function showToast(msg, ms=2400) {
   t.textContent = msg; t.classList.remove('hidden');
   clearTimeout(showToast._t);
   showToast._t = setTimeout(() => t.classList.add('hidden'), ms);
+}
+
+function showUndoToast(msg, ms=5000) {
+  const t = document.getElementById('toast');
+  t.innerHTML = `${msg} <button onclick="undoDelete()" style="margin-left:10px;background:rgba(255,255,255,.25);border:none;color:#fff;padding:2px 8px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700">元に戻す</button>`;
+  t.classList.remove('hidden');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => t.classList.add('hidden'), ms);
+}
+
+function undoDelete() {
+  if (!lastDeleted) return;
+  companies.splice(lastDeleted.index, 0, lastDeleted.company);
+  lastDeleted = null;
+  save();
+  if (currentPage === 'dashboard') renderDashboard(); else renderCompanies();
+  document.getElementById('sidebar-count').textContent = companies.length + ' 社';
+  showToast('↩️ 元に戻しました');
+}
+
+// ===== THEME =====
+function setTheme(dark) {
+  document.body.classList.toggle('dark', dark);
+  localStorage.setItem('shukatsu_theme', dark ? 'dark' : 'light');
+  document.querySelectorAll('.theme-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.theme === (dark ? 'dark' : 'light'))
+  );
 }
 
 // ===== NAVIGATION =====
@@ -328,6 +356,7 @@ function companyCard(c) {
       <div class="cc-status-row">
         <span class="status-badge" style="color:${si.color};background:${si.bg};border-color:${si.color}">${si.label}</span>
         ${c.mypageUrl?`<a href="${esc(c.mypageUrl)}" target="_blank" onclick="event.stopPropagation()" style="font-size:11px;color:var(--primary);font-weight:700;text-decoration:none">🔗 マイページ</a>`:''}
+        <a href="https://www.google.com/search?q=${encodeURIComponent(c.name)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="search-link">🔍 検索</a>
       </div>
       ${nextHtml}
     </div>`;
@@ -347,6 +376,7 @@ function companyRow(c) {
       </div>
       <div class="row-next">${next?`📅 ${formatDate(next.date)}`:''}</div>
       <span class="status-badge" style="color:${si.color};background:${si.bg};border-color:${si.color}">${si.label}</span>
+      <a href="https://www.google.com/search?q=${encodeURIComponent(c.name)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="search-link">🔍</a>
     </div>`;
 }
 
@@ -564,6 +594,8 @@ function openModal(companyId) {
   }
   document.getElementById('modal-title').textContent = c ? c.name : '企業を追加';
   document.getElementById('modal-subtitle').textContent = c ? (getStatusInfo(c.status).label) : '';
+  const msb = document.getElementById('modal-search-btn');
+  if (msb) { msb.href = c ? 'https://www.google.com/search?q=' + encodeURIComponent(c.name) : '#'; msb.style.display = c ? '' : 'none'; }
   document.getElementById('btn-delete-company').style.display = c ? '' : 'none';
 
   // Populate selects
@@ -661,13 +693,16 @@ function saveModal() {
 
 function deleteCompany() {
   if (!editingId) return;
-  const c = companies.find(x=>x.id===editingId);
-  if (!confirm(`「${c?.name}」を削除しますか？`)) return;
-  companies = companies.filter(x=>x.id!==editingId);
+  const idx = companies.findIndex(x=>x.id===editingId);
+  if (idx === -1) return;
+  const c = companies[idx];
+  if (!confirm(`「${c.name}」を削除しますか？`)) return;
+  lastDeleted = { company: c, index: idx };
+  companies.splice(idx, 1);
   save(); closeModal();
   if (currentPage==='dashboard') renderDashboard(); else renderCompanies();
   document.getElementById('sidebar-count').textContent = companies.length + ' 社';
-  showToast('🗑️ 削除しました');
+  showUndoToast('🗑️ 削除しました');
 }
 
 // ===== MODAL EVENTS =====
@@ -795,9 +830,11 @@ function initListeners() {
     companies=[]; save(); navigate('dashboard'); showToast('🗑️ 全データを削除しました');
   });
   document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
-  // Menu toggle (mobile): hamburger not shown on mobile but just in case
   const mt = document.getElementById('menu-toggle');
   if (mt) mt.addEventListener('click', () => navigate(currentPage));
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.addEventListener('click', () => setTheme(btn.dataset.theme === 'dark'));
+  });
 }
 
 // No sample data — start clean for new users
@@ -805,6 +842,8 @@ function initListeners() {
 function init() {
   load();
   initListeners();
+  const savedTheme = localStorage.getItem('shukatsu_theme');
+  if (savedTheme === 'dark') setTheme(true);
   navigate('dashboard');
 }
 
