@@ -375,6 +375,8 @@ function companyCard(c) {
         <span class="status-badge" style="color:${si.color};background:${si.bg};border-color:${si.color}">
           ${si.label}
         </span>
+        <a href="https://www.google.com/search?q=${encodeURIComponent(c.name)}" target="_blank" rel="noopener"
+           onclick="event.stopPropagation()" class="search-link">🔍 検索</a>
       </div>
       ${nextHtml}
     </div>`;
@@ -392,7 +394,8 @@ function companyRow(c) {
       </div>
       <div class="row-next">${next ? `📅 ${formatDate(next.date)}` : ''}</div>
       <span class="status-badge" style="color:${si.color};background:${si.bg};border-color:${si.color}">${si.label}</span>
-      <div class="row-pri"><span style="color:${pi.color}">● ${pi.label}</span></div>
+      <a href="https://www.google.com/search?q=${encodeURIComponent(c.name)}" target="_blank" rel="noopener"
+         onclick="event.stopPropagation()" class="search-link">🔍</a>
     </div>`;
 }
 
@@ -681,6 +684,15 @@ function openModal(companyId) {
 
   document.getElementById('modal-title').textContent = company ? company.name : '企業を追加';
   document.getElementById('btn-delete-company').style.display = company ? '' : 'none';
+
+  // Search button in modal header
+  const searchBtnEl = document.getElementById('modal-search-btn');
+  if (company && searchBtnEl) {
+    searchBtnEl.href = 'https://www.google.com/search?q=' + encodeURIComponent(company.name);
+    searchBtnEl.style.display = '';
+  } else if (searchBtnEl) {
+    searchBtnEl.style.display = 'none';
+  }
 
   // Populate industries
   const indEl = document.getElementById('f-industry');
