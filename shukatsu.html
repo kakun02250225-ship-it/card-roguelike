@@ -11,9 +11,40 @@
   <title>就活カレンダー</title>
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon.svg">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <link rel="stylesheet" href="shukatsu.css">
 </head>
 <body>
+<!-- Login overlay -->
+<div id="login-overlay" class="login-overlay" style="display:none">
+  <div class="login-card">
+    <div class="login-logo-mark">就</div>
+    <h1 class="login-title">就活管理</h1>
+    <p class="login-sub">どの端末でもデータを同期</p>
+    <div class="login-tabs">
+      <button class="login-tab active" id="tab-signin" onclick="switchAuthTab('signin')">ログイン</button>
+      <button class="login-tab" id="tab-signup" onclick="switchAuthTab('signup')">新規登録</button>
+    </div>
+    <div class="login-form">
+      <div class="form-group">
+        <label>メールアドレス（ID）</label>
+        <input type="email" id="login-email" class="form-control" placeholder="example@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>パスワード（6文字以上）</label>
+        <div class="pass-wrap">
+          <input type="password" id="login-password" class="form-control" placeholder="••••••••" autocomplete="current-password">
+          <button type="button" class="pass-toggle" onclick="toggleLoginPass()">👁</button>
+        </div>
+      </div>
+      <p id="login-error" class="login-error" style="display:none"></p>
+      <button class="btn btn-primary btn-block" id="login-submit" onclick="submitAuth()">ログイン</button>
+    </div>
+    <p class="login-note">※ メールアドレスとパスワードを設定するだけで<br>スマホ・PC・どの端末でもデータが同期されます</p>
+  </div>
+</div>
 <div id="app">
   <!-- Sidebar (desktop) -->
   <aside id="sidebar">
@@ -124,6 +155,13 @@
           <div class="theme-toggle-row">
             <button class="theme-btn active" data-theme="light">☀️ ライト</button>
             <button class="theme-btn" data-theme="dark">🌙 ダーク</button>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header"><h2>👤 アカウント</h2></div>
+          <div id="auth-status" class="auth-status">
+            <span id="auth-email" class="auth-email"></span>
+            <button class="btn btn-secondary btn-sm" id="btn-logout" onclick="logout()">ログアウト</button>
           </div>
         </div>
         <div class="export-grid">

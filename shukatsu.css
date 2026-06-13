@@ -903,6 +903,95 @@ textarea.form-control { resize: vertical; min-height: 75px; }
 }
 .modal-search-btn:hover { opacity: .8; }
 
+/* ===== LOGIN OVERLAY ===== */
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(160deg, #1E1B4B 0%, #312E81 50%, #4C1D95 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+.login-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 36px 32px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.3);
+  text-align: center;
+}
+.login-logo-mark {
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 900;
+  color: #fff;
+  margin: 0 auto 12px;
+  box-shadow: 0 8px 20px rgba(99,102,241,.35);
+}
+.login-title { font-size: 22px; font-weight: 800; color: #1A1D2E; margin-bottom: 4px; }
+.login-sub { font-size: 13px; color: #6B7280; margin-bottom: 20px; }
+.login-tabs {
+  display: flex;
+  background: #F3F4F6;
+  border-radius: 8px;
+  padding: 3px;
+  margin-bottom: 20px;
+  gap: 3px;
+}
+.login-tab {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6B7280;
+  cursor: pointer;
+  transition: all .15s;
+}
+.login-tab.active { background: #fff; color: #1A1D2E; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+.login-form { text-align: left; }
+.login-error {
+  font-size: 12px;
+  color: #EF4444;
+  background: #FEE2E2;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+.login-note {
+  font-size: 11px;
+  color: #9CA3AF;
+  margin-top: 16px;
+  line-height: 1.6;
+}
+.auth-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.auth-email {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-muted);
+  word-break: break-all;
+}
+
+/* Dark mode for login card */
+body.dark .login-card { background: #1C1C2E; }
+body.dark .login-title { color: #E2E8F0; }
+body.dark .login-tabs { background: #2D2D44; }
+body.dark .login-tab.active { background: #3D3D5C; color: #E2E8F0; }
+
 /* ===== TOAST ===== */
 .toast {
   position: fixed;

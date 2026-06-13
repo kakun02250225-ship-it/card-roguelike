@@ -1,3 +1,26 @@
+// ===== FIREBASE CONFIG =====
+// ↓ Firebaseコンソール(console.firebase.google.com)から取得したconfigを貼り付けてください
+const FIREBASE_CONFIG = {
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
+};
+
+let _fbApp = null, _auth = null, _db = null, _currentUser = null;
+
+function initFirebase() {
+  if (!FIREBASE_CONFIG.apiKey) return false;
+  try {
+    _fbApp = firebase.initializeApp(FIREBASE_CONFIG);
+    _auth = firebase.auth();
+    _db = firebase.firestore();
+    return true;
+  } catch(e) { return false; }
+}
+
 // ===== CONSTANTS =====
 const STORAGE_KEY = 'shukatsu_v2';
 
@@ -74,7 +97,34 @@ let lastDeleted = null;
 // ===== STORAGE =====
 function save() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(companies)); } catch(e) {}
+  if (_db && _currentUser) {
+    _db.collection('users').doc(_currentUser.uid)
+      .set({ companies, updatedAt: Date.now() })
+      .catch(() => {});
+  }
 }
+
+async function loadFromFirestore() {
+  if (!_db || !_currentUser) return false;
+  try {
+    const snap = await _db.collection('users').doc(_currentUser.uid).get();
+    if (snap.exists) {
+      companies = snap.data().companies || [];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(companies));
+      return true;
+    } else {
+      // First login: upload any existing localStorage data
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        companies = JSON.parse(raw);
+        await _db.collection('users').doc(_currentUser.uid)
+          .set({ companies, updatedAt: Date.now() });
+      }
+      return true;
+    }
+  } catch(e) { return false; }
+}
+
 function load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -168,6 +218,83 @@ function setTheme(dark) {
   document.querySelectorAll('.theme-btn').forEach(b =>
     b.classList.toggle('active', b.dataset.theme === (dark ? 'dark' : 'light'))
   );
+}
+
+// ===== AUTH UI =====
+function showLoginOverlay() {
+  document.getElementById('login-overlay').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+function hideLoginOverlay() {
+  document.getElementById('login-overlay').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+}
+
+function switchAuthTab(tab) {
+  const isSignin = tab === 'signin';
+  document.getElementById('tab-signin').classList.toggle('active', isSignin);
+  document.getElementById('tab-signup').classList.toggle('active', !isSignin);
+  document.getElementById('login-submit').textContent = isSignin ? 'ログイン' : '新規登録';
+  document.getElementById('login-error').style.display = 'none';
+  switchAuthTab._mode = tab;
+}
+switchAuthTab._mode = 'signin';
+
+function toggleLoginPass() {
+  const inp = document.getElementById('login-password');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+async function submitAuth() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  const btn = document.getElementById('login-submit');
+  if (!email || !pass) { showAuthError('メールアドレスとパスワードを入力してください'); return; }
+  btn.disabled = true; btn.textContent = '...';
+  errEl.style.display = 'none';
+  try {
+    const mode = switchAuthTab._mode;
+    if (mode === 'signup') {
+      await _auth.createUserWithEmailAndPassword(email, pass);
+    } else {
+      await _auth.signInWithEmailAndPassword(email, pass);
+    }
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = switchAuthTab._mode === 'signin' ? 'ログイン' : '新規登録';
+    const msgs = {
+      'auth/user-not-found': 'このメールアドレスは登録されていません',
+      'auth/wrong-password': 'パスワードが間違っています',
+      'auth/email-already-in-use': 'このメールアドレスはすでに使用されています',
+      'auth/invalid-email': 'メールアドレスの形式が正しくありません',
+      'auth/weak-password': 'パスワードは6文字以上にしてください',
+      'auth/too-many-requests': 'しばらく時間をおいて再試行してください',
+      'auth/invalid-credential': 'メールアドレスまたはパスワードが正しくありません',
+    };
+    showAuthError(msgs[e.code] || 'エラーが発生しました: ' + e.message);
+  }
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+async function logout() {
+  if (!_auth) return;
+  if (!confirm('ログアウトしますか？')) return;
+  await _auth.signOut();
+  companies = [];
+  showLoginOverlay();
+}
+
+function updateAuthStatus(user) {
+  const emailEl = document.getElementById('auth-email');
+  const card = document.getElementById('auth-status');
+  if (emailEl && user) emailEl.textContent = user.email;
+  if (card) card.style.display = user ? 'flex' : 'none';
 }
 
 // ===== NAVIGATION =====
@@ -839,12 +966,39 @@ function initListeners() {
 
 // No sample data — start clean for new users
 
+let _listenersReady = false;
+
 function init() {
-  load();
-  initListeners();
-  const savedTheme = localStorage.getItem('shukatsu_theme');
-  if (savedTheme === 'dark') setTheme(true);
-  navigate('dashboard');
+  const fbReady = initFirebase();
+
+  if (fbReady && _auth) {
+    // Show a brief loading state
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('login-overlay').style.display = 'none';
+
+    _auth.onAuthStateChanged(async user => {
+      _currentUser = user;
+      if (user) {
+        hideLoginOverlay();
+        await loadFromFirestore();
+        updateAuthStatus(user);
+        if (!_listenersReady) { initListeners(); _listenersReady = true; }
+        const savedTheme = localStorage.getItem('shukatsu_theme');
+        if (savedTheme === 'dark') setTheme(true);
+        navigate('dashboard');
+      } else {
+        showLoginOverlay();
+        document.getElementById('app').style.display = 'none';
+      }
+    });
+  } else {
+    // No Firebase config — run in local-only mode
+    load();
+    if (!_listenersReady) { initListeners(); _listenersReady = true; }
+    const savedTheme = localStorage.getItem('shukatsu_theme');
+    if (savedTheme === 'dark') setTheme(true);
+    navigate('dashboard');
+  }
 }
 
 init();
