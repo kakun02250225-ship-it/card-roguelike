@@ -60,6 +60,7 @@ let viewMode = 'card';
 let editingId = null;
 let editPriority = 2;
 let modalEvents = [];
+let lastDeleted = null;
 
 // ===== STORAGE =====
 function save() {
@@ -129,6 +130,32 @@ function showToast(msg, duration = 2200) {
   t.classList.remove('hidden');
   clearTimeout(showToast._timer);
   showToast._timer = setTimeout(() => t.classList.add('hidden'), duration);
+}
+
+function showUndoToast(msg, ms=5000) {
+  const t = document.getElementById('toast');
+  t.innerHTML = `${msg} <button onclick="undoDelete()" style="margin-left:10px;background:rgba(255,255,255,.25);border:none;color:#fff;padding:2px 8px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700">元に戻す</button>`;
+  t.classList.remove('hidden');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => t.classList.add('hidden'), ms);
+}
+
+function undoDelete() {
+  if (!lastDeleted) return;
+  companies.splice(lastDeleted.index, 0, lastDeleted.company);
+  lastDeleted = null;
+  save();
+  if (currentPage === 'dashboard') renderDashboard(); else renderCompanies();
+  document.getElementById('sidebar-count').textContent = companies.length + ' 社';
+  showToast('↩️ 元に戻しました');
+}
+
+// ===== THEME =====
+function setTheme(dark) {
+  document.body.classList.toggle('dark', dark);
+  localStorage.setItem('shukatsu_theme', dark ? 'dark' : 'light');
+  const btns = document.querySelectorAll('.theme-btn');
+  btns.forEach(b => b.classList.toggle('active', b.dataset.theme === (dark ? 'dark' : 'light')));
 }
 
 // ===== NAVIGATION =====
@@ -745,15 +772,18 @@ function saveModal() {
 
 function deleteCompany() {
   if (!editingId) return;
-  const c = companies.find(x => x.id === editingId);
-  if (!confirm(`「${c?.name}」を削除しますか？`)) return;
-  companies = companies.filter(x => x.id !== editingId);
+  const idx = companies.findIndex(x => x.id === editingId);
+  if (idx === -1) return;
+  const c = companies[idx];
+  if (!confirm(`「${c.name}」を削除しますか？`)) return;
+  lastDeleted = { company: c, index: idx };
+  companies.splice(idx, 1);
   save();
   closeModal();
   if (currentPage === 'dashboard') renderDashboard();
   else renderCompanies();
   document.getElementById('sidebar-count').textContent = companies.length + ' 社登録中';
-  showToast('🗑️ 削除しました');
+  showUndoToast('🗑️ 削除しました');
 }
 
 // ===== MODAL EVENTS =====
@@ -952,6 +982,9 @@ function initListeners() {
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeModal();
   });
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.addEventListener('click', () => setTheme(btn.dataset.theme === 'dark'));
+  });
 }
 
 // ===== SAMPLE DATA =====
@@ -1009,8 +1042,10 @@ function addSampleData() {
 // ===== INIT =====
 function init() {
   load();
-  addSampleData();
   initListeners();
+  // Restore theme preference
+  const savedTheme = localStorage.getItem('shukatsu_theme');
+  if (savedTheme === 'dark') setTheme(true);
   navigate('dashboard');
 }
 

@@ -308,7 +308,6 @@ body {
   padding: 8px 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  font-size: 13px;
   outline: none;
   background: var(--surface);
 }
@@ -317,7 +316,6 @@ body {
   padding: 7px 10px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  font-size: 13px;
   background: var(--surface);
   cursor: pointer;
   outline: none;
@@ -638,7 +636,6 @@ label.required::after { content: ' *'; color: var(--danger); }
   padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  font-size: 13px;
   outline: none;
   background: var(--surface);
   color: var(--text);
@@ -693,6 +690,31 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 }
 .event-row .remove-ev:hover { background: var(--danger-light); color: var(--danger); }
 
+/* ===== THEME TOGGLE ===== */
+.theme-toggle-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+.theme-btn {
+  flex: 1;
+  padding: 10px 0;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.theme-btn.active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary);
+}
+.theme-btn:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
+
 /* ===== TOAST ===== */
 .toast {
   position: fixed;
@@ -708,9 +730,63 @@ textarea.form-control { resize: vertical; min-height: 80px; }
   z-index: 500;
   box-shadow: var(--shadow-lg);
   animation: toastIn .25s ease;
+  display: flex;
+  align-items: center;
 }
 .toast.hidden { display: none; }
 @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+/* ===== DARK MODE ===== */
+body.dark {
+  --bg: #0F0F1A;
+  --surface: #1C1C2E;
+  --border: #2D2D44;
+  --text: #E2E8F0;
+  --text-muted: #94A3B8;
+  --text-light: #64748B;
+  --primary-light: #1E1B4B;
+  --success-light: #064E3B;
+  --warning-light: #451A03;
+  --danger-light: #450A0A;
+}
+body.dark #sidebar {
+  background: linear-gradient(160deg, #080612 0%, #110E2E 60%, #1C1547 100%);
+}
+body.dark #top-header { background: #1C1C2E; border-color: #2D2D44; }
+body.dark .card { background: #1C1C2E; border-color: #2D2D44; }
+body.dark .modal { background: #1C1C2E; border-color: #2D2D44; }
+body.dark .modal-footer { background: #161626; }
+body.dark .modal-tabs { border-color: #2D2D44; }
+body.dark .modal-body { background: #1C1C2E; }
+body.dark .form-control, body.dark .search-box, body.dark .filter-select {
+  background: #131320; border-color: #2D2D44; color: #E2E8F0;
+}
+body.dark .event-row { background: #131320; border-color: #2D2D44; }
+body.dark .company-card { background: #1C1C2E; border-color: #2D2D44; }
+body.dark .company-row { background: #1C1C2E; border-color: #2D2D44; }
+body.dark .company-row:hover { background: #131320; }
+body.dark .event-item { background: #131320; }
+body.dark .event-item:hover { background: #1E1B4B; }
+body.dark .cal-day.other-month { background: #131320; }
+body.dark .cal-day:hover { background: #1E1B4B; }
+body.dark .calendar-wrap { background: #1C1C2E; }
+body.dark .cal-weekdays { background: linear-gradient(135deg,#1A1730,#1C1C2E); }
+body.dark .cc-next { background: #131320; }
+body.dark .pipe-step:hover { background: #131320; }
+body.dark .toggle-btn { background: #1C1C2E; border-color: #2D2D44; color: #94A3B8; }
+body.dark .meta-tag { background: #131320; border-color: #2D2D44; color: #94A3B8; }
+body.dark .help-box { background: #1A1730; border-color: #3730A3; }
+body.dark .modal-overlay { background: rgba(0,0,0,.7); }
+body.dark .tab-btn:hover { background: #1E1B4B; }
+body.dark .tab-btn.active { background: #1E1B4B; }
+body.dark .pri-btn { background: #1C1C2E; border-color: #2D2D44; color: #94A3B8; }
+body.dark .section-divider span { background: #1C1C2E; border-color: #2D2D44; }
+body.dark .cal-event-detail { background: #1C1C2E; border-color: #2D2D44; }
+body.dark .detail-ev { background: #131320; }
+body.dark .detail-ev:hover { background: #1E1B4B; }
+body.dark .btn-secondary { background: #1C1C2E; border-color: #2D2D44; color: #E2E8F0; }
+body.dark .btn-secondary:hover { background: #131320; }
+body.dark .btn-ghost { color: #94A3B8; }
 
 /* ===== MISC ===== */
 .text-muted { color: var(--text-muted); font-size: 13px; }
