@@ -1,12 +1,12 @@
 // ===== FIREBASE CONFIG =====
 // ↓ Firebaseコンソール(console.firebase.google.com)から取得したconfigを貼り付けてください
 const FIREBASE_CONFIG = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSyAAhtMbvpyfB01PqcT_ZxbAdQhWSFuHRs0",
+  authDomain: "shukatsu-app-8c3d4.firebaseapp.com",
+  projectId: "shukatsu-app-8c3d4",
+  storageBucket: "shukatsu-app-8c3d4.firebasestorage.app",
+  messagingSenderId: "749519645337",
+  appId: "1:749519645337:web:0e087a84792f8d65eba608"
 };
 
 let _fbApp = null, _auth = null, _db = null, _currentUser = null;
