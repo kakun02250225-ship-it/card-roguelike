@@ -605,13 +605,22 @@ function openModal(companyId) {
   document.getElementById('tab-basic').classList.add('active');
 
   document.getElementById('modal-overlay').classList.remove('hidden');
-  document.body.classList.add('modal-open');
+  // iOS scroll lock: fix body in place to prevent calendar resize on keyboard open
+  const scrollY = window.scrollY;
+  document.body.style.position = 'fixed';
+  document.body.style.top = `-${scrollY}px`;
+  document.body.style.width = '100%';
   document.getElementById('f-name').focus();
 }
 
 function closeModal() {
   document.getElementById('modal-overlay').classList.add('hidden');
-  document.body.classList.remove('modal-open');
+  // Restore scroll position after iOS scroll lock
+  const scrollY = parseInt(document.body.style.top || '0') * -1;
+  document.body.style.position = '';
+  document.body.style.top = '';
+  document.body.style.width = '';
+  window.scrollTo(0, scrollY);
   editingId = null;
 }
 
