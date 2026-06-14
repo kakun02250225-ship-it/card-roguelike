@@ -999,11 +999,43 @@ textarea.form-control { resize: vertical; min-height: 75px; }
   word-break: break-all;
 }
 
+/* ===== DARK MODE ===== */
+body.dark {
+  --bg: #0F0F1A;
+  --surface: #1C1C2E;
+  --border: #2D2D44;
+  --text: #E2E8F0;
+  --text-muted: #94A3B8;
+  --text-light: #64748B;
+  --primary-light: #262647;
+  --success-light: #0C3A2E;
+  --warning-light: #3D2E0C;
+  --danger-light: #3D1A1A;
+  --shadow: 0 1px 4px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.5);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,.6);
+}
+body.dark { background: var(--bg); color: var(--text); }
+body.dark .cal-day.other-month { background: #16161F; }
+body.dark .cal-day.other-month .day-num { color: #4B5268; }
+body.dark .modal-footer { background: #16161F; }
+body.dark .company-card:hover { border-color: #4B4B6E; }
+body.dark .cal-day:hover { background: #262647; }
+body.dark .tab-btn.active { background: var(--surface); }
+body.dark .pass-toggle,
+body.dark .modal-close,
+body.dark .menu-btn { color: var(--text-muted); }
+body.dark .theme-btn { background: var(--surface); }
+body.dark .status-badge { filter: brightness(1.1); }
+body.dark .help-box { background: #16161F; }
+
 /* Dark mode for login card */
 body.dark .login-card { background: #1C1C2E; }
 body.dark .login-title { color: #E2E8F0; }
+body.dark .login-sub { color: #94A3B8; }
 body.dark .login-tabs { background: #2D2D44; }
 body.dark .login-tab.active { background: #3D3D5C; color: #E2E8F0; }
+body.dark .login-tab { color: #94A3B8; }
 
 /* ===== TOAST ===== */
 .toast {

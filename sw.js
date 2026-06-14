@@ -1,4 +1,4 @@
-const CACHE = 'shukatsu-v5';
+const CACHE = 'shukatsu-v6';
 const FILES = [
   './shukatsu.html',
   './shukatsu.css',
